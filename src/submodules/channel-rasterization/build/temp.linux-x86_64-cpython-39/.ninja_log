@@ -1,6 +1,0 @@
-# ninja log v5
-0	1716	1750647086083840155	/workspace/sgproject/src/semantic-gaussians/submodules/channel-rasterization/build/temp.linux-x86_64-cpython-39/cuda_rasterizer/forward.o	ec5cc7c69e4c3b4e
-0	1794	1750647086163842174	/workspace/sgproject/src/semantic-gaussians/submodules/channel-rasterization/build/temp.linux-x86_64-cpython-39/cuda_rasterizer/backward.o	ad43e478cb1ae3a0
-0	4606	1750647088971913034	/workspace/sgproject/src/semantic-gaussians/submodules/channel-rasterization/build/temp.linux-x86_64-cpython-39/cuda_rasterizer/rasterizer_impl.o	f74961a03bbe3d73
-0	10039	1750647094404050161	/workspace/sgproject/src/semantic-gaussians/submodules/channel-rasterization/build/temp.linux-x86_64-cpython-39/ext.o	a8291f0da66a359
-1	28554	1750647112920518037	/workspace/sgproject/src/semantic-gaussians/submodules/channel-rasterization/build/temp.linux-x86_64-cpython-39/rasterize_points.o	42437d6a539eb916
