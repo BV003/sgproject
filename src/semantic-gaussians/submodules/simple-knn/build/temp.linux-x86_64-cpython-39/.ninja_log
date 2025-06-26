@@ -1,0 +1,4 @@
+# ninja log v5
+0	6144	1750646749219489984	/workspace/sgproject/src/semantic-gaussians/submodules/simple-knn/build/temp.linux-x86_64-cpython-39/simple_knn.o	4ea07baaa73a0adb
+0	9618	1750646752687574056	/workspace/sgproject/src/semantic-gaussians/submodules/simple-knn/build/temp.linux-x86_64-cpython-39/ext.o	de22745709358c06
+1	28357	1750646771428029186	/workspace/sgproject/src/semantic-gaussians/submodules/simple-knn/build/temp.linux-x86_64-cpython-39/spatial.o	d7ed2da691ae641f

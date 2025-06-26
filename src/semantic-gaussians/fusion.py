@@ -258,7 +258,7 @@ def fuse_one_scene(config, model_2d):
 
 
 if __name__ == "__main__":
-    config = OmegaConf.load("./config/fusion_scannet.yaml")
+    config = OmegaConf.load("./config/fusion_mipnerf360.yaml")
     override_config = OmegaConf.from_cli()
     config = OmegaConf.merge(config, override_config)
     print(OmegaConf.to_yaml(config))
@@ -292,29 +292,3 @@ if __name__ == "__main__":
     model_2d.set_predefined_cls(SCANNET20_CLASS_LABELS)
 
     fuse_one_scene(config, model_2d)
-
-    # for idx, scene in enumerate(tqdm(scenes)):
-    #     if config.model.dynamic:
-    #         T = len(os.listdir(os.path.join(config.scene.scene_path, scene)))
-    #         for t in tqdm(range(T)):
-    #             model_dir = os.path.join(config.model.model_dir, scene)
-    #             scene_path = os.path.join(config.scene.scene_path, scene, str(t))
-    #             out_dir = os.path.join(config.fusion.out_dir, scene)
-    #             print(scene_path)
-
-    #             scene_config = deepcopy(config)
-    #             scene_config.scene.scene_path = scene_path
-    #             scene_config.model.model_dir = model_dir
-    #             scene_config.model.dynamic_t = t
-    #             scene_config.fusion.out_dir = out_dir
-    #             fuse_one_scene(scene_config, model_2d)
-    #     else:
-    #         model_dir = os.path.join(config.model.model_dir, scene)
-    #         scene_path = os.path.join(config.scene.scene_path, scene)
-    #         out_dir = os.path.join(config.fusion.out_dir, scene)
-
-    #         scene_config = deepcopy(config)
-    #         scene_config.scene.scene_path = scene_path
-    #         scene_config.model.model_dir = model_dir
-    #         scene_config.fusion.out_dir = out_dir
-    #         fuse_one_scene(scene_config, model_2d)

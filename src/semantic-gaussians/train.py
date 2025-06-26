@@ -215,7 +215,7 @@ def train(config):
 
 
 if __name__ == "__main__":
-    config = OmegaConf.load("./config/official_train.yaml")
+    config = OmegaConf.load("./config/train.yaml")
     override_config = OmegaConf.from_cli()
     config = OmegaConf.merge(config, override_config)
     print(OmegaConf.to_yaml(config))
