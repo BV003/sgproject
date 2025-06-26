@@ -1,0 +1,6 @@
+# ninja log v5
+0	9561	1750646783916333233	/workspace/sgproject/src/semantic-gaussians/submodules/rgbd-rasterization/build/temp.linux-x86_64-cpython-39/ext.o	40c45238ef52531
+0	28213	1750646802568788449	/workspace/sgproject/src/semantic-gaussians/submodules/rgbd-rasterization/build/temp.linux-x86_64-cpython-39/rasterize_points.o	6b90e86ec8aba03
+12	1583	1750647080263693337	/workspace/sgproject/src/semantic-gaussians/submodules/rgbd-rasterization/build/temp.linux-x86_64-cpython-39/cuda_rasterizer/forward.o	fccda87c55086a9a
+12	1583	1750647080263693337	/workspace/sgproject/src/semantic-gaussians/submodules/rgbd-rasterization/build/temp.linux-x86_64-cpython-39/cuda_rasterizer/backward.o	fe098a86b1986f96
+12	4118	1750647082795757202	/workspace/sgproject/src/semantic-gaussians/submodules/rgbd-rasterization/build/temp.linux-x86_64-cpython-39/cuda_rasterizer/rasterizer_impl.o	d6294204f642637e
