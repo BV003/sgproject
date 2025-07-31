@@ -1,5 +1,5 @@
 scene:
-  scene_path: "/workspace/data/room" # Path to the scene data
+  scene_path: "/home/c202/Desktop/liuweiqi/Data/room" # Path to the scene data
   test_cameras: True
   colmap_images: "images"
   colmap_eval_hold: 8
@@ -15,7 +15,7 @@ pipeline:
 
 model:
   sh_degree: 3
-  model_dir: "/workspace/outputs"   
+  model_dir: "./src/output/room"   
   load_iteration: -1
   device: "cuda:0"
   random_init: False
