@@ -3,8 +3,8 @@ import torch
 import numpy as np
 
 from torch.utils.data import Dataset
-from dataset.fusion_utils import Voxelizer
-from dataset.augmentation import ElasticDistortion, RandomHorizontalFlip, Compose
+from data.fusion_utils import Voxelizer
+from data.augmentation import ElasticDistortion, RandomHorizontalFlip, Compose
 from utils.dataset_utils import load_gaussian_ply
 
 

@@ -15,7 +15,7 @@ from scene import Scene
 from utils.system_utils import searchForMaxIteration, set_seed
 from utils.camera_utils import get_camera_viser
 from utils.sh_utils import RGB2SH, SH2RGB
-from dataset.scannet.scannet_constants import COLORMAP
+from data.scannet.scannet_constants import COLORMAP
 
 #输入是一个颜色向量（RGB），输出对应的16进制颜色字符串
 def to_hex(color):

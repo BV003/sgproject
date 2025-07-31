@@ -3,7 +3,7 @@ import torch
 import imageio
 import numpy as np
 import skimage.transform as sktf
-from dataset.scannet.scannet_constants import SCANNET20_CLASS_LABELS, COCOMAP_CLASS_LABELS, COLORMAP
+from data.scannet.scannet_constants import SCANNET20_CLASS_LABELS, COCOMAP_CLASS_LABELS, COLORMAP
 
 
 def get_text_features(model_2d, dataset_name="scannet20"):

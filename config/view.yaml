@@ -1,5 +1,5 @@
 scene:
-  scene_path: "/workspace/data/flowers"
+  scene_path: "/workspace/Data/room"
   dataset_name: "cocomap"
   test_cameras: False
   colmap_images: "images"
@@ -16,11 +16,11 @@ pipeline:
 
 model:
   sh_degree: 3
-  model_dir: "./output/flowers/"
+  model_dir: "/workspace/sgproject/output/room/"
   dynamic: False
   load_iteration: -1
   device: "cuda:0"
 
 render:
-  fusion_dir: "./output/flowers/0.pt"
+  fusion_dir: "/workspace/sgproject/output/room/0.pt"
   model_2d: samclip # choose from openseg, lseg, samclip, vlpart

@@ -89,3 +89,34 @@
 | 多用户支持      | 多个客户端独立连接、控制和渲染                                 |
 
 
+## Install
+你可以选择自己创建环境，也可以选择用docker拉取镜像
+1. Create individual virtual environment (or use existing environments with CUDA Development kit and corresponding version of PyTorch).
+    ```bash
+    conda env create -f environment.yaml
+    conda activate sega
+    ```
+
+2. Install additional dependencies with pip as many of them need to be compiled.
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. Compile and install MinkowskiEngine through anaconda, recommending to install through official instructions.
+    ```bash
+    # Here is an example only for Anaconda, CUDA 11.x
+    conda install openblas-devel -c anaconda
+    pip install git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas"
+    ```
+
+4.  拉取docker镜像，并从docker镜像启动容器
+    ```bash
+    docker run -it \-p 8080:8080 \
+    --gpus all \
+    --shm-size=24g \
+    -v ~/Desktop/liuweiqi/Data:/workspace/Data \
+    -v ~/Desktop/liuweiqi/sgproject:/workspace/sgproject \
+    --name sgcontainer \
+    sgproject:v1.0 /bin/bash
+
+    ```

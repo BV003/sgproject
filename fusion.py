@@ -14,8 +14,8 @@ from model import GaussianModel, render, render_chn
 from scene import Scene
 from utils.system_utils import searchForMaxIteration, set_seed
 from model.render_utils import get_text_features, render_palette
-from dataset.fusion_utils import PointCloudToImageMapper
-from dataset.scannet.scannet_constants import SCANNET20_CLASS_LABELS
+from data.fusion_utils import PointCloudToImageMapper
+from data.scannet.scannet_constants import SCANNET20_CLASS_LABELS
 
 warnings.filterwarnings("ignore")
 
@@ -163,7 +163,7 @@ def fuse_one_scene(config, model_2d):
 
 
 if __name__ == "__main__":
-    config = OmegaConf.load("./config/fusion_mipnerf360.yaml")
+    config = OmegaConf.load("./config/fusion.yaml")
     override_config = OmegaConf.from_cli()
     config = OmegaConf.merge(config, override_config)
     print(OmegaConf.to_yaml(config))
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     elif model_2d_name == "samclip":
         from model.samclip_predictor import SAMCLIP
 
-        model_2d = SAMCLIP("./weights/groundingsam/sam_vit_h_4b8939.pth", "ViT-L/14@336px")
+        model_2d = SAMCLIP("./weights/sam_vit_h_4b8939.pth", "ViT-L/14@336px")
     elif model_2d_name == "vlpart":
         from model.vlpart_predictor import VLPart
 

@@ -1,7 +1,7 @@
 """IoU"""
 
 import numpy as np
-from dataset.scannet.scannet_constants import SCANNET20_CLASS_LABELS, COCOMAP_CLASS_LABELS
+from data.scannet.scannet_constants import SCANNET20_CLASS_LABELS, COCOMAP_CLASS_LABELS
 
 def confusion_matrix(pred_ids, gt_ids, num_classes):
     """calculate the confusion matrix."""

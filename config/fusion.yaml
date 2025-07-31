@@ -1,5 +1,5 @@
 scene:
-  scene_path: "/workspace/data/flowers"
+  scene_path: "/workspace/Data/room"
   dataset_name: "cocomap"
   test_cameras: False
   colmap_images: "images"
@@ -16,7 +16,7 @@ pipeline:
 
 model:
   sh_degree: 3
-  model_dir: "./output/flowers/"
+  model_dir: "/workspace/sgproject/output/room/"
   dynamic: False
   load_iteration: -1
   device: "cuda:0"
@@ -31,4 +31,4 @@ fusion:
   cut_boundary: 10
   n_split_points: 9999999 #80000
   num_rand_file_per_scene: 1 #5
-  out_dir: "./output/flowers/"
+  out_dir: "/workspace/sgproject/output/room/"
