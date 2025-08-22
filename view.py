@@ -117,17 +117,17 @@ def main(config):
             label="Edit mode",  # 下拉框标签
             options=["Remove", "Color", "Size", "Move"],  # 选项列表，与原按钮组保持一致
             initial_value="Remove",  # 初始选中值，对应原默认值
-            hint="Select Edit mode (Remove/Color/Size/Move)" # 可选：悬停提示
+            hint="选择编辑操作类型：Remove（移除物体）、Color（修改颜色）、Size（调整大小）、Move（移动位置）"# 可选：悬停提示
         )
         edit_mode = "Remove"
-        gui_edit_input = server.add_gui_text("Edit prompt (divided by comma)", "")
-        gui_preserve_input = server.add_gui_text("Preserve prompt (divided by comma)", "")
+        gui_edit_input = server.add_gui_text("Edit prompt ", "",hint="输入需要编辑的物体名称（用逗号分隔），例如：椅子,沙发")
+        gui_preserve_input = server.add_gui_text("Preserve prompt ", "",hint="输入需要保留不被编辑的物体名称（用逗号分隔），例如：桌子,窗户")
         gui_editing_button = server.add_gui_button("Apply editing prompt")
         
         server.add_gui_markdown(" ")     
         gui_text_prompt=server.add_gui_markdown("Text Prompt")
         gui_prompt_input = server.add_gui_text(
-            "识别物体标签",
+            "Text prompt",
             "wall,floor,chair,table,door,window,bed,sofa",
             hint="输入场景中需要识别的物体名称（用逗号分隔），用于语义分割和渲染。例如：chair,sofa,window"
         )
