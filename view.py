@@ -27,6 +27,9 @@ def get_text(vocabulary, prefix_prompt=""):
     return texts
 
 
+
+
+
 def main(config):
     with torch.no_grad():
         # Load 3D Gaussians读取并加载3D高斯场模型
@@ -90,48 +93,142 @@ def main(config):
         server.world_axes.visible = False
         need_update = False
         need_color_compute = True
-        tab_group = server.add_gui_tab_group()
 
-        # Settings tab 创建“Settings”选项卡及控件
-        with tab_group.add_tab("Settings", viser.Icon.SETTINGS):
-            gui_render_mode = server.add_gui_button_group("Render mode", ("RGB", "Depth", "Semantic", "Relevancy"))
-            render_mode = "RGB"
-            gui_near_slider = server.add_gui_slider("Depth near", min=0, max=3, step=0.2, initial_value=1.5)
-            gui_far_slider = server.add_gui_slider("Depth far", min=6, max=20, step=0.5, initial_value=6)
-            gui_scale_slider = server.add_gui_slider("Gaussian scale", min=0.01, max=1, step=0.01, initial_value=1)
-            resolution_scale_group = server.add_gui_button_group("Resolution scale", ("0.5x", "1x", "2x", "4x"))
-            #gui_background_checkbox = server.add_gui_checkbox("Remove background", False)
-            gui_up_checkbox = server.add_gui_checkbox("Lock up direction", False)
 
-            gui_prompt_input = server.add_gui_text(
-                "Text prompt (divided by comma)",
-                "wall,floor,cabinet,bed,chair,sofa,table,door,window,bookshelf,picture,counter,desk,curtain,refrigerator,shower curtain,toilet,sink,bathtub",
-            )
+        # gui部分
+        gui_text_rendermode=server.add_gui_markdown("Render Mode") 
+        gui_render_mode = server.add_gui_dropdown(
+            label="Render mode",  # 下拉框标签
+            options=["RGB", "Depth", "Semantic", "Relevancy"],  # 选项列表，与原按钮组保持一致
+            initial_value="RGB",  # 初始选中值，对应原默认值
+            hint="Select rendering mode (RGB/Depth/Semantic/Relevancy)"  # 可选：悬停提示
+        )
+        render_mode = "RGB"
+             
+        server.add_gui_markdown(" ")      
+        gui_text_renderpara=server.add_gui_markdown("Render Parameters")               
+        gui_near_slider = server.add_gui_slider("Depth near", min=0, max=3, step=0.2, initial_value=1.5)
+        gui_far_slider = server.add_gui_slider("Depth far", min=6, max=20, step=0.5, initial_value=6)
+        gui_scale_slider = server.add_gui_slider("Gaussian scale", min=0.01, max=1, step=0.01, initial_value=1)
+        
+        server.add_gui_markdown(" ")     
+        gui_text_edit=server.add_gui_markdown("Editing")
+        gui_edit_mode = server.add_gui_dropdown(
+            label="Edit mode",  # 下拉框标签
+            options=["Remove", "Color", "Size", "Move"],  # 选项列表，与原按钮组保持一致
+            initial_value="Remove",  # 初始选中值，对应原默认值
+            hint="Select Edit mode (Remove/Color/Size/Move)" # 可选：悬停提示
+        )
+        edit_mode = "Remove"
+        gui_edit_input = server.add_gui_text("Edit prompt (divided by comma)", "")
+        gui_preserve_input = server.add_gui_text("Preserve prompt (divided by comma)", "")
+        gui_editing_button = server.add_gui_button("Apply editing prompt")
+        
+        server.add_gui_markdown(" ")     
+        gui_text_prompt=server.add_gui_markdown("Text Prompt")
+        gui_prompt_input = server.add_gui_text(
+            "识别物体标签",
+            "wall,floor,chair,table,door,window,bed,sofa",
+            hint="输入场景中需要识别的物体名称（用逗号分隔），用于语义分割和渲染。例如：chair,sofa,window"
+        )
+        gui_prompt_button = server.add_gui_button("Apply text prompt")
+           
+        server.add_gui_markdown(" ")        
+        gui_text_color=server.add_gui_markdown("Colormap")
+        gui_markdown = server.add_gui_markdown("")
 
-            gui_prompt_button = server.add_gui_button("Apply text prompt")
+        #    用字典映射渲染模式到需要显示的GUI元素列表
+        render_mode_visibility = {
+            "RGB": [
+                gui_scale_slider,  # 高斯缩放滑块在RGB模式下可见
+                gui_edit_mode,   # 近平面滑块在RGB模式下可见
+                gui_edit_input,  # 编辑输入框在RGB模式下可见
+                gui_preserve_input,  # 保留输入框在RGB模式下可见
+                gui_editing_button,  # 应用编辑按钮在RGB模式下可见
 
-        with tab_group.add_tab("Editing", viser.Icon.SETTINGS):
-            gui_edit_mode = server.add_gui_button_group("Edit mode", ("Remove", "Color", "Size", "Move"))
-            edit_mode = "Remove"
-            gui_edit_input = server.add_gui_text("Edit prompt (divided by comma)", "")
-            gui_preserve_input = server.add_gui_text("Preserve prompt (divided by comma)", "")
-            gui_editing_button = server.add_gui_button("Apply editing prompt")
+            ],
+            "Depth": [
+                gui_near_slider,   # 近平面滑块
+                gui_far_slider,     # 远平面滑块
+                gui_scale_slider,  # 高斯缩放滑块在RGB模式下可见
+                gui_edit_mode,   # 近平面滑块在RGB模式下可见
+                gui_edit_input,  # 编辑输入框在RGB模式下可见
+                gui_preserve_input,  # 保留输入框在RGB模式下可见
+                gui_editing_button  # 应用编辑按钮在RGB模式下可见
+            ],
+            "Semantic": [
+                gui_scale_slider,
+                gui_prompt_input,  # 文本提示输入框
+                gui_text_prompt,
+                gui_prompt_button,  # 应用文本提示按钮
+                gui_edit_mode,   # 近平面滑块在RGB模式下可见
+                gui_edit_input,  # 编辑输入框在RGB模式下可见
+                gui_preserve_input,  # 保留输入框在RGB模式下可见
+                gui_editing_button,  # 应用编辑按钮在RGB模式下可见
+                gui_markdown,
+                gui_text_color
+            ],
+            "Relevancy": [
+                gui_scale_slider,
+                gui_prompt_input,
+                gui_text_prompt,
+                gui_prompt_button,
+                gui_edit_mode,   # 近平面滑块在RGB模式下可见
+                gui_edit_input,  # 编辑输入框在RGB模式下可见
+                gui_preserve_input,  # 保留输入框在RGB模式下可见
+                gui_editing_button,  # 应用编辑按钮在RGB模式下可见
+                gui_markdown,
+                gui_text_color
+            ]
+        }
 
-        # Colormap tab  创建“Colormap”选项卡，用于显示颜色映射的Markdown
-        with tab_group.add_tab("Colormap", viser.Icon.COLOR_FILTER):
-            gui_markdown = server.add_gui_markdown("")
+        all_gui_elements = [
+            gui_scale_slider,
+            gui_near_slider,
+            gui_far_slider,
+            gui_prompt_input,
+            gui_text_prompt,
+            gui_prompt_button,
+            gui_edit_mode,
+            gui_edit_input,
+            gui_preserve_input,
+            gui_editing_button,
+            gui_markdown,
+            gui_text_color
+        ]
+        
+    
 
-        # Button callbacks 各种按钮和滑动条的回调函数
-        @gui_render_mode.on_click
-        def _(_) -> None:
+        def update_gui_visibility(current_mode):
+            """根据当前渲染模式更新GUI元素的可见性"""
+            # 首先隐藏所有元素
+            for elem in all_gui_elements:
+                elem.visible = False
+                 
+            # 然后显示当前模式需要的元素
+            if current_mode in render_mode_visibility:
+                for elem in render_mode_visibility[current_mode]:
+                    elem.visible = True
+
+
+                     
+                     
+        update_gui_visibility(render_mode)  
+        
+        #gui界面绑定函数           
+        @gui_render_mode.on_update
+        def _(event: viser.GuiEvent) -> None:  # 参数为GuiEvent
             nonlocal render_mode
-            render_mode = gui_render_mode.value
-
-        @gui_edit_mode.on_click
-        def _(_) -> None:
+            render_mode=event.target.value
+            update_gui_visibility(render_mode)
+            print(f"切换渲染模式为：{event.target.value}")  # 可选：验证是否生效
+    
+        
+        @gui_edit_mode.on_update
+        def _(event: viser.GuiEvent) -> None:  # 参数为GuiEvent
             nonlocal edit_mode
             nonlocal need_color_compute
-            edit_mode = gui_edit_mode.value
+            edit_mode = event.target.value
             need_color_compute = True
 
         @gui_prompt_button.on_click
@@ -149,10 +246,7 @@ def main(config):
             nonlocal need_color_compute
             need_color_compute = True
 
-        @resolution_scale_group.on_click
-        def _(_) -> None:
-            nonlocal need_color_compute
-            need_color_compute = True
+
 
         @server.on_client_connect
         def _(client: viser.ClientHandle) -> None:
@@ -197,7 +291,6 @@ def main(config):
                 content_head = "| | |\n|:-:|:-|"
                 content_body = "".join(
                     [
-                        #f"\n|![color](https://via.placeholder.com/5x5/{color}/ffffff?text=+)|{label_name}||"
                         f"\n|![color](https://dummyimage.com/5x5/{color}/ffffff?text=+)|{label_name}||"
                         for label_name, color in color_mapping
                     ]
@@ -206,8 +299,9 @@ def main(config):
                 
                 
                 # Shape control
-                height = int(float(resolution_scale_group.value[:-1]) * scene_camera.image_height)
-                width = int(float(resolution_scale_group.value[:-1]) * scene_camera.image_width)
+                scale_factor = 0.5  # 写死为 0.5
+                height = int(scale_factor * scene_camera.image_height)
+                width = int(scale_factor * scene_camera.image_width)
 
                 # Scene editing control
                 if gui_edit_input.value != "":
@@ -260,8 +354,7 @@ def main(config):
                 w2c_matrix = (
                     SE3.from_rotation_and_translation(SO3(client_info.wxyz), client_info.position).inverse().as_matrix()
                 )
-                if not gui_up_checkbox.value:
-                    client.camera.up_direction = SO3(client.camera.wxyz) @ np.array([0.0, -1.0, 0.0])
+                client.camera.up_direction = SO3(client.camera.wxyz) @ np.array([0.0, -1.0, 0.0])
                 new_camera = get_camera_viser(
                     scene_camera,
                     w2c_matrix[:3, :3].transpose(),
