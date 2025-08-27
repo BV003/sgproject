@@ -177,20 +177,46 @@ def create_gui_controls(server):
         ]
     }
 
-    return (
-        gui_render_mode, gui_near_slider, gui_far_slider, gui_scale_slider,
-        gui_edit_mode, gui_edit_input, gui_preserve_input, gui_editing_button,
-        gui_prompt_input, gui_prompt_button, gui_markdown,
-        all_gui_elements, render_mode_visibility
-    )
+    # 返回一个包含所有 GUI 控件和可见性信息的字典
+    gui_controls = {
+        "gui_render_mode": gui_render_mode,
+        "gui_near_slider": gui_near_slider,
+        "gui_far_slider": gui_far_slider,
+        "gui_scale_slider": gui_scale_slider,
+        "gui_edit_mode": gui_edit_mode,
+        "gui_edit_input": gui_edit_input,
+        "gui_preserve_input": gui_preserve_input,
+        "gui_editing_button": gui_editing_button,
+        "gui_prompt_input": gui_prompt_input,
+        "gui_prompt_button": gui_prompt_button,
+        "gui_markdown": gui_markdown,
+        "all_gui_elements": all_gui_elements,
+        "render_mode_visibility": render_mode_visibility,
+    }
+    return gui_controls
+    
+    # return (
+    #     gui_render_mode, gui_near_slider, gui_far_slider, gui_scale_slider,
+    #     gui_edit_mode, gui_edit_input, gui_preserve_input, gui_editing_button,
+    #     gui_prompt_input, gui_prompt_button, gui_markdown,
+    #     all_gui_elements, render_mode_visibility
+    # )
     
     
 def bind_gui_events(
-    server, state,
-    gui_render_mode, gui_edit_mode, gui_prompt_button, gui_editing_button, gui_scale_slider,
-    all_gui_elements, render_mode_visibility
+    server, state,gui_controls
 ):
     """绑定GUI控件的事件处理逻辑"""
+    gui_render_mode = gui_controls["gui_render_mode"]
+    gui_edit_mode = gui_controls["gui_edit_mode"]
+    gui_prompt_button = gui_controls["gui_prompt_button"]
+    gui_editing_button = gui_controls["gui_editing_button"]
+    gui_scale_slider = gui_controls["gui_scale_slider"]
+    all_gui_elements = gui_controls["all_gui_elements"]
+    render_mode_visibility = gui_controls["render_mode_visibility"]
+    
+    
+    
     # 更新GUI控件可见性的工具函数
     def update_gui_visibility(current_mode):
         for elem in all_gui_elements:
@@ -252,9 +278,18 @@ def main_render_loop(
     colormap, colormap_hex, colormap_cuda,
     background, scene_camera,
     server,
-    gui_near_slider, gui_far_slider, gui_scale_slider,
-    gui_edit_input, gui_preserve_input, gui_prompt_input, gui_markdown
+    gui_controls
 ):
+    
+    # 解包必要的 GUI 控件
+    gui_near_slider = gui_controls["gui_near_slider"]
+    gui_far_slider = gui_controls["gui_far_slider"]
+    gui_scale_slider = gui_controls["gui_scale_slider"]
+    gui_edit_input = gui_controls["gui_edit_input"]
+    gui_preserve_input = gui_controls["gui_preserve_input"]
+    gui_prompt_input = gui_controls["gui_prompt_input"]
+    gui_markdown = gui_controls["gui_markdown"]
+    
     """主渲染循环，处理渲染逻辑和客户端更新"""
     original_opacity, original_scale, original_color, original_coord = original_props
     start_time = time.time() if config.model.dynamic else None
@@ -450,19 +485,10 @@ def main(config):
         state.w2c = w2c  # 将相机矩阵存入状态
 
         # 3. 创建GUI控件
-        (
-            gui_render_mode, gui_near_slider, gui_far_slider, gui_scale_slider,
-            gui_edit_mode, gui_edit_input, gui_preserve_input, gui_editing_button,
-            gui_prompt_input, gui_prompt_button, gui_markdown,
-            all_gui_elements, render_mode_visibility
-        ) = create_gui_controls(server)
+        gui_controls = create_gui_controls(server)
 
         # 4. 绑定GUI事件
-        bind_gui_events(
-            server, state,
-            gui_render_mode, gui_edit_mode, gui_prompt_button, gui_editing_button, gui_scale_slider,
-            all_gui_elements, render_mode_visibility
-        )
+        bind_gui_events(server, state, gui_controls)
 
         # 5. 启动主渲染循环
         main_render_loop(
@@ -472,8 +498,7 @@ def main(config):
             colormap, colormap_hex, colormap_cuda,
             background, scene_camera,
             server,
-            gui_near_slider, gui_far_slider, gui_scale_slider,
-            gui_edit_input, gui_preserve_input, gui_prompt_input, gui_markdown
+            gui_controls
         )
         
 if __name__ == "__main__":

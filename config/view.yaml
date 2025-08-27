@@ -1,5 +1,5 @@
 scene:
-  scene_path: "/Data/mip-nerf-360/room"
+  scene_path: "/Data/mip-nerf-360/bonsai"
   dataset_name: "cocomap"
   test_cameras: False
   colmap_images: "images"
@@ -16,11 +16,11 @@ pipeline:
 
 model:
   sh_degree: 3
-  model_dir: "/sgproject/output/room/"
+  model_dir: "/sgproject/output/bonsai/"
   dynamic: False
   load_iteration: -1
   device: "cuda:0"
 
 render:
-  fusion_dir: "/sgproject/output/room/0.pt"
+  fusion_dir: "/sgproject/output/bonsai/0.pt"
   model_2d: samclip 
