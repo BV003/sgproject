@@ -6,7 +6,6 @@ from functools import partial
 from omegaconf import OmegaConf
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
-
 from model import GaussianModel
 from model.renderer import render
 from scene import Scene
@@ -15,6 +14,15 @@ from utils.loss_utils import l1_loss, ssim, psnr
 
 
 def init_dir(config):
+    """
+    初始化输出目录并保存配置文件
+    
+    Args:
+        config: 配置参数对象，包含训练和模型相关设置
+        
+    Returns:
+        SummaryWriter: TensorBoard日志记录器
+    """
     if not config.train.exp_name:
         unique_str = str(uuid.uuid4())
         config.model.model_dir = os.path.join("./output", unique_str[0:10])
@@ -32,6 +40,16 @@ def init_dir(config):
 
 
 def eval(args, iteration, scene: Scene, render_partial, writer):
+    """
+    在测试集和训练集上评估模型性能
+    
+    Args:
+        args: 配置参数
+        iteration: 当前迭代次数
+        scene: 场景对象，包含相机和点云数据
+        render_partial: 部分应用的渲染函数
+        writer: TensorBoard日志记录器
+    """
     torch.cuda.empty_cache()
     eval_configs = (
         {"name": "test", "cameras": scene.getTestCameras()},
@@ -72,26 +90,34 @@ def eval(args, iteration, scene: Scene, render_partial, writer):
     torch.cuda.empty_cache()
 
 
+
+
 def train(config):
+    # 加载场景数据
     scene = Scene(config.scene)
+    # 初始化高斯模型
     gaussians = GaussianModel(config.model.sh_degree)
     first_iter = 0
 
     
-
+    # 从点云数据创建高斯分布
     gaussians.create_from_pcd(scene.pcd, scene.cameras_extent, config.model.random_init)
+    
+    # 初始化输出目录并获取日志记录器
     writer = init_dir(config)
 
+    # 设置高斯模型的训练参数（优化器等）
     gaussians.training_setup(config.train)
-
+    # 设置背景颜色
     bg_color = [1, 1, 1] if config.scene.white_background else [0, 0, 0]
     background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
-
+    # 用于测量迭代时间的CUDA事件
     iter_start = torch.cuda.Event(enable_timing=True)
     iter_end = torch.cuda.Event(enable_timing=True)
-
+    # 用于平滑显示损失的指数移动平均
     ema_loss_for_log = 0.0
     progress_bar = tqdm(range(first_iter, config.train.iterations), desc="Training progress")
+    # 创建训练相机的数据加载器
     loader = DataLoader(
         scene.getTrainCameras(),
         batch_size=1,
@@ -102,6 +128,7 @@ def train(config):
     data_iter = iter(loader)
     first_iter += 1
 
+    # 主训练循环
     for iteration in range(first_iter, config.train.iterations + 1):
         iter_start.record()
         gaussians.update_learning_rate(iteration)
@@ -118,7 +145,8 @@ def train(config):
             viewpoint_cam = next(data_iter)[0]
         viewpoint_cam.cuda()
 
-        # Render
+        # 渲染当前视角
+        # 根据配置决定是否使用随机背景
         bg = torch.rand((3), device="cuda") if config.train.random_background else background
         render_pkg = render(viewpoint_cam, gaussians, config.pipeline, bg)
         image, viewspace_point_tensor, visibility_filter, radii = (
@@ -128,7 +156,7 @@ def train(config):
             render_pkg["radii"],
         )
 
-        # Loss
+        # 计算损失
         gt_image = viewpoint_cam.original_image #.cuda()
         if config.train.cut_edge:
             h, w = image.shape[1:3]
@@ -140,10 +168,12 @@ def train(config):
         else:
             Ll1 = l1_loss(image, gt_image)
             loss = (1.0 - config.train.lambda_dssim) * Ll1 + config.train.lambda_dssim * (1.0 - ssim(image, gt_image))
+        # 反向传播计算梯度
         loss.backward()
 
         iter_end.record()
 
+        # 不计算梯度的操作
         with torch.no_grad():
             # Densification
             if iteration < config.train.densify_until_iter:
@@ -172,14 +202,14 @@ def train(config):
                 gaussians.optimizer.step()
                 gaussians.optimizer.zero_grad()
 
-            # Logging
+            # Logging 记录训练日志到TensorBoard
             writer.add_scalar("train/l1_loss", Ll1.item(), iteration)
             writer.add_scalar("train/total_loss", loss.item(), iteration)
             writer.add_scalar("train/iter_time", iter_start.elapsed_time(iter_end), iteration)
             writer.add_scalar("train/total_points", gaussians.get_xyz.shape[0], iteration)
             writer.add_histogram("train/opacity_histogram", gaussians.get_opacity, iteration)
 
-            # Evaluation
+            # Evaluation在指定迭代次数进行评估
             if iteration in config.train.test_iterations:
                 eval(
                     config,
@@ -189,16 +219,13 @@ def train(config):
                     writer,
                 )
 
-            # Saving gaussians
+            # Saving gaussians在指定迭代次数保存高斯模型
             if iteration in config.train.save_iterations:
                 print("\n[ITER {}] Saving Gaussians".format(iteration))
                 point_cloud_path = os.path.join(config.model.model_dir, "point_cloud/iteration_{}".format(iteration))
                 gaussians.save_ply(os.path.join(point_cloud_path, "point_cloud.ply"))
-            # if (iteration in config.train.checkpoint_iterations):
-            #     print("\n[ITER {}] Saving Checkpoint".format(iteration))
-            #     torch.save((gaussians.capture(), iteration), config.model.model_dir + "/chkpnt" + str(iteration) + ".pth")
-
-            # Progress bar
+        
+            # Progress bar更新进度条
             ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
             if iteration % 20 == 0:
                 progress_bar.set_postfix({"Loss": f"{ema_loss_for_log:.{7}f}"})
@@ -212,6 +239,5 @@ if __name__ == "__main__":
     override_config = OmegaConf.from_cli()
     config = OmegaConf.merge(config, override_config)
     print(OmegaConf.to_yaml(config))
-
     set_seed(config.pipeline.seed)
     train(config)
